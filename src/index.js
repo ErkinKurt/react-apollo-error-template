@@ -26,9 +26,11 @@ const cache = new InMemoryCache({
           merge (existing, incoming) {
             return existing ? [...existing, ...incoming] : incoming;
           },
-          read(existing) {
-            return existing;
-          }
+          // When I don't provide read then it doesn't get the data in merge function. 
+          // However when I define read this time when filter type changes nothing is happening.
+          // read(existing) {
+          //   return existing;
+          // }
         }
       }
     }
