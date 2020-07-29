@@ -42,6 +42,7 @@ export default function App() {
       variables: {
         pageNumber: data.people.length / PAGE_SIZE
       },
+      //It is working as I expected when I use update query instead of merge.
       // updateQuery: (prev, { fetchMoreResult }) => {
       //   if (!fetchMoreResult) return prev;
       //   return { ...prev, people: [...prev.people, ...fetchMoreResult.people] };
