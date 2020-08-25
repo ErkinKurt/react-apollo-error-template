@@ -1,6 +1,11 @@
 import React from "react";
 import { render } from "react-dom";
-import { ApolloClient, InMemoryCache, ApolloProvider, makeVar } from "@apollo/client";
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloProvider,
+  makeVar,
+} from "@apollo/client";
 
 import { link } from "./graphql/link";
 import App from "./App";
@@ -9,37 +14,41 @@ import "./index.css";
 
 const filterId = 0;
 
-export const filterIdVar = makeVar(
-  filterId
-);
+export const filterIdVar = makeVar(filterId);
 
-const cache = new InMemoryCache({
+export const cache = new InMemoryCache({
   typePolicies: {
     Query: {
       fields: {
         filterId: {
           read() {
             return filterIdVar();
-          }
+          },
         },
         people: {
-          merge (existing, incoming) {
-            return existing ? [...existing, ...incoming] : incoming;
+          keyArgs: ['filterType'],
+          merge(existing = [], incoming) {
+            let mergedData = [];
+            if (incoming) {
+              const duplicateValues = incoming.filter((inc) =>
+                existing.some((exs) => exs.__ref === inc.__ref)
+              );
+              const cleanedExisting = existing.filter(
+                (exs) => !duplicateValues.some((dup) => dup.__ref === exs.__ref)
+              );
+              mergedData = [...cleanedExisting, ...incoming];
+            }
+            return existing ? mergedData : incoming;
           },
-          // When I don't provide read then it doesn't get the data in merge function. 
-          // However when I define read this time when filter type changes nothing is happening.
-          // read(existing) {
-          //   return existing;
-          // }
-        }
-      }
-    }
-  }
-})
+        },
+      },
+    },
+  },
+});
 
 const client = new ApolloClient({
   cache,
-  link
+  link,
 });
 
 render(

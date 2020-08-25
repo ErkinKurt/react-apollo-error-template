@@ -31,6 +31,9 @@ const peopleData = [
   { id: 10, name: 'Max Richardo', filterType: 1 },
   { id: 11, name: 'Vettel Richardo', filterType: 1 },
   { id: 12, name: 'Junior Richardo', filterType: 1 },
+  { id: 13, name: 'Janny Richardo', filterType: 1 },
+  { id: 14, name: 'Valteri Bottas', filterType: 1 },
+  { id: 15, name: 'Micheal Shimicker? xd', filterType: 1 },
 ];
 
 const QueryType = new GraphQLObjectType({

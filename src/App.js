@@ -2,7 +2,7 @@ import React from "react";
 import { gql, useQuery } from "@apollo/client";
 import useFilter from "./queries/getFilter";
 import { filterIdVar } from ".";
-
+import { cache } from './index';
 const ALL_PEOPLE = gql`
   query AllPeople($filterType: Int, $pageNumber: Int) {
     people(filterType: $filterType, pageNumber: $pageNumber){
@@ -21,7 +21,8 @@ export default function App() {
   const {
     loading,
     data,
-    fetchMore
+    fetchMore,
+    refetch
   } = useQuery(ALL_PEOPLE, {
     variables: {
       filterType: filterId,
@@ -40,14 +41,25 @@ export default function App() {
   const loadMore = () => {
     fetchMore({
       variables: {
-        pageNumber: data.people.length / PAGE_SIZE
+        pageNumber: data?.people.length / PAGE_SIZE
       },
-      //It is working as I expected when I use update query instead of merge.
-      // updateQuery: (prev, { fetchMoreResult }) => {
-      //   if (!fetchMoreResult) return prev;
-      //   return { ...prev, people: [...prev.people, ...fetchMoreResult.people] };
-      // }
     });
+  }
+
+  const onRefetch = () => {
+    cache.modify({
+      fields: {
+        people(existingPeopleRefs, { DELETE }) {
+          console.log(existingPeopleRefs);
+          return DELETE;
+        }
+      }
+    });
+    // I'm aware of that we are removing the people field from only root query, so cache.gc() can remove the rest.
+    // But still the refetch will hit the server resolver but, doesn't manipulate the cache.
+    //cache.gc();
+    // I tried with setTimeout because the cache manipulation might be async?
+    setTimeout(() => refetch(), 5000);
   }
 
   return (
@@ -55,6 +67,7 @@ export default function App() {
       <h1>Apollo Client Issue Reproduction</h1>
       <button onClick={onClick_0}>Change Status Type: 0</button>
       <button onClick={onClick_1}>Change Status Type: 1</button>
+      <button onClick={onRefetch}>Refetch</button>
       <button onClick={loadMore}>Load More</button>
       <p>
         This application can be used to demonstrate an error in Apollo Client.
@@ -64,7 +77,7 @@ export default function App() {
         <p>Loading…</p>
       ) : (
         <ul>
-          {data.people.map(person => (
+          {data?.people.map(person => (
             <li key={person.id}>{person.name}</li>
           ))}
         </ul>
