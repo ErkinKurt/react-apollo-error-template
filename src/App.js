@@ -48,6 +48,7 @@ export default function App() {
 
   const onRefetch = () => {
     cache.modify({
+      broadcast: true,
       fields: {
         people(existingPeopleRefs, { DELETE }) {
           console.log(existingPeopleRefs);
@@ -57,7 +58,7 @@ export default function App() {
     });
     // I'm aware of that we are removing the people field from only root query, so cache.gc() can remove the rest.
     // But still the refetch will hit the server resolver but, doesn't manipulate the cache.
-    //cache.gc();
+    cache.gc();
     // I tried with setTimeout because the cache manipulation might be async?
     setTimeout(() => refetch(), 5000);
   }
